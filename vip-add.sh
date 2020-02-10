@@ -5,7 +5,7 @@ maskTarget=( ${3} ) && # for example "24 10.33.0.4"
 mask=${maskTarget[0]} &&
 target=${maskTarget[1]} &&
 ipCmd=add &&
-iptablesCmd='-A' &&
+iptablesCmd='-I' &&
 if [[ ${0} == *vip-del.sh ]]; then
 	ipCmd=del &&
 	iptablesCmd='-D' ;
