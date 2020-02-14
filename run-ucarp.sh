@@ -1,4 +1,30 @@
 #!/bin/bash
+params=( $(getopt --unquoted --longoptions vip:,target:,password: --options "" -- ${@} ) ) ;
+i=0 ;
+while [[ ${params[i]} != -- ]]; do
+	case "${params[i]}" in
+		--vip)
+			i=$[ ${i} + 1 ] ;
+			VIP=${params[i]} ;;
+		--target)
+			i=$[ ${i} + 1 ] ;
+			TARGET=${params[i]} ;;
+		--password)
+			i=$[ ${i} + 1 ] ;
+			PASSWORD=${params[i]} ;;
+		*)
+			echo "unrecognized param: ${params[i]}" >&2;
+			exit 1;;
+	esac &&
+	i=$(( ${i} + 1 ));
+done ;
+for param in VIP TARGET PASSWORD; do 
+	if [[ -z ${!param} ]]; then
+		echo "invalid or missing ${param} param" >&2;
+		exit 1;
+	fi;
+done;
+
 iface=$(ip route show default  |cut -d ' ' -f 5) &&
 addrInfo=( $(ip addr show ${iface} |grep inet |grep -v inet6 |grep -v secondary) ) &&
 IFS=/ addrMask=( ${addrInfo[1]} ) &&
@@ -7,5 +33,5 @@ mask=${addrMask[1]}  &&
 vid=$(echo ${VIP} |cut -d . -f 4) &&
 prio=$(echo ${addr} |cut -d . -f 4) &&
 
-exec ucarp -z -n -u /usr/local/sbin/vip-add.sh -d /usr/local/sbin/vip-del.sh \
-	-i ${iface} -s ${addr} -k ${prio} -a ${VIP} -v ${vid} -x "${mask} ${TARGET}" -p ${PASSWORD}
+exec ucarp -z -n -u ./vip-add -d ./vip-del  -p ${PASSWORD} \
+	-i ${iface} -s ${addr} -k ${prio} -a ${VIP} -v ${vid} -x "${mask} ${TARGET}"
