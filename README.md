@@ -68,7 +68,7 @@ This may affect other services running on these nodes though. In particular it b
 				"containers": [
 					{
 						"name": "kevip",
-						"image": "morgwai/kevip:0.99.1",
+						"image": "morgwai/kevip:0.99.2",
 						"securityContext": {
 							"capabilities": {
 								"add": ["NET_ADMIN", "NET_RAW"]

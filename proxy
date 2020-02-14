@@ -31,7 +31,6 @@ IFS=/ addrMask=( ${addrInfo[1]} ) &&
 addr=${addrMask[0]}  &&
 mask=${addrMask[1]}  &&
 vid=$(echo ${VIP} |cut -d . -f 4) &&
-prio=$(echo ${addr} |cut -d . -f 4) &&
 
 exec ucarp -z -n -u ./vip-add -d ./vip-del  -p ${PASSWORD} \
-	-i ${iface} -s ${addr} -k ${prio} -a ${VIP} -v ${vid} -x "${mask} ${TARGET}"
+	-i ${iface} -s ${addr} -a ${VIP} -v ${vid} -x "${mask} ${TARGET}"
