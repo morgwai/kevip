@@ -58,58 +58,56 @@ Releases are provided as docker images at [docker hub](https://hub.docker.com/r/
 
 ```json
 {
-	"apiVersion": "apps/v1",
-	"kind": "Deployment",
-	"metadata": {
-		"name": "kevip-89.16.122.41"
-	},
-	"spec": {
-		"replicas": 3,
-		"selector": {
-			"matchLabels": {
-				"app": "kevip-89.16.122.41"
-			}
-		},
-		"template": {
-			"metadata": {
-				"labels": {
-					"app": "kevip-89.16.122.41"
-				}
-			},
-			"hostNetwork": true,
-			"spec": {
-				"containers": [
-					{
-						"name": "kevip",
-						"image": "morgwai/kevip:0.99.2",
-						"securityContext": {
-							"capabilities": {
-								"add": ["NET_ADMIN", "NET_RAW"]
-							}
-						},
-						"env": [
-							{
-								"name": "VIP",
-								"value": "89.16.122.41"
-							},
-							{
-								"name": "TARGET",
-								"value": "54.111.118.99"
-							},
-							{
-								"name": "PASSWORD",
-								"valueFrom": {
-									"secretKeyRef": {
-										"name": "kevip",
-										"key": "password"
-									}
-								}
-							}
-						]
-					}
-				]
-			}
-		}
-	}
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": {
+        "name": "kevip-89.16.122.41"
+    },
+    "spec": {
+        "replicas": 3,
+        "selector": {
+            "matchLabels": {
+                "app": "kevip-89.16.122.41"
+            }
+        },
+        "template": {
+            "metadata": {
+                "labels": {
+                    "app": "kevip-89.16.122.41"
+                }
+            },
+            "spec": {
+                "hostNetwork": true,
+                "containers": [{
+                    "name": "kevip",
+                    "image": "morgwai/kevip:0.99.2",
+                    "securityContext": {
+                        "capabilities": {
+                            "add": ["NET_ADMIN", "NET_RAW"]
+                        }
+                    },
+                    "env": [
+                        {
+                            "name": "VIP",
+                            "value": "89.16.122.41"
+                        },
+                        {
+                            "name": "TARGET",
+                            "value": "54.111.118.99"
+                        },
+                        {
+                            "name": "PASSWORD",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "name": "kevip",
+                                    "key": "password"
+                                }
+                            }
+                        }
+                    ]
+                }]
+            }
+        }
+    }
 }
 ```
