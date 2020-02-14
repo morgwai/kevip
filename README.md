@@ -36,6 +36,7 @@ Further more, in ingress mode, due to the fact how iptables/ipvs work and that t
 ```bash
 iptables -t nat -A POSTROUTING -j MASQUERADE
 ```
+This may affect other services running on these nodes though. In particular it breaks Kevip running in egress mode.
 
 ----
 
