@@ -3,7 +3,7 @@
 
 Kevip is a simple [UCarp](https://github.com/jedisct1/UCarp) / [Keepalived](https://www.keepalived.org/) L2 VIP + iptables proxy.
 It can be used to provide a single static egress (source) virtual IP for a set of processes running on several machines (such as Kubernetes pods) if NAT is not possible for whatever reason (refereed hereinafter as *egress mode*).
-On clusters where external load-balancers are not available, it can be also used to expose a Kubernetes service on a single (public) virtual IP, although there are some caveats and limitations explained below in this scenario (refereed hereinafter as *ingress mode*).
+On clusters where external load-balancers are not available, it can be also used to expose a Kubernetes service on a single (public) virtual IP, although there are some [caveats and limitations](#caveats-and-limitations) in this mode (refereed hereinafter as *ingress mode*).
 
 ----
 
@@ -28,6 +28,10 @@ For high availability reasons, you should be running 2-3 replicas of Kevip for e
 
 Kevip must be granted permissions to setup a VIP and manipulate iptables. On Kubernetes this requires `NET_ADMIN` and `NET_RAW` capabilities and running on host network.
 
+----
+
+## Caveats and Limitations
+
 In egress mode Kevip can be running anywhere where your nodes can reach it, but it's recommended to run it on the cluster itself to reduce network latency.
 
 In ingress mode Kevip *must* be running on your cluster's nodes (either as your cluster's deployment or started from the node machine level), so that it can reach cluster-IP of its target service.
@@ -37,6 +41,15 @@ Further more, in ingress mode, due to the fact how iptables/ipvs work and that t
 iptables -t nat -A POSTROUTING -j MASQUERADE
 ```
 This may affect other services running on these nodes though. In particular it breaks Kevip running in egress mode.
+
+Kevip should scale reasonably well in terms of traffic throughput, but it will probably not scale well in terms of number of VIPs on the same cluster (up to few hundred probably) as updating very long iptables with thousands of rules will be getting slower and slower.
+
+----
+
+
+## Releases
+
+Releases are provided as docker images at [docker hub](https://hub.docker.com/r/morgwai/kevip/tags)
 
 ----
 
