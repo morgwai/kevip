@@ -1,13 +1,12 @@
 # KEVIP
 ### Kubernetes external VIP iptables proxy
 
-----
-
-Kevip is a simple [ucarp](https://github.com/jedisct1/UCarp)/[keepalived](https://www.keepalived.org/) L2 VIP + iptables proxy.
+Kevip is a simple [UCarp](https://github.com/jedisct1/UCarp) / [Keepalived](https://www.keepalived.org/) L2 VIP + iptables proxy.
 It can be used to provide a single static egress (source) virtual IP for a set of processes running on several machines (such as Kubernetes pods) if NAT is not possible for whatever reason (refereed hereinafter as *egress mode*).
 On clusters where external load-balancers are not available, it can be also used to expose a Kubernetes service on a single (public) virtual IP, although there are some caveats and limitations explained below in this scenario (refereed hereinafter as *ingress mode*).
 
 ----
+
 
 ## Usage
 
@@ -34,9 +33,12 @@ In egress mode Kevip can be running anywhere where your nodes can reach it, but 
 In ingress mode Kevip *must* be running on your cluster's nodes (either as your cluster's deployment or started from the node machine level), so that it can reach cluster-IP of its target service.
 
 Further more, in ingress mode, due to the fact how iptables/ipvs work and that the target cluster-IP is also a VIP itself, the following iptables rule must be added on all nodes where Kevip replicas may be scheduled:
-`iptables -t nat -A POSTROUTING -j MASQUERADE`
+```bash
+iptables -t nat -A POSTROUTING -j MASQUERADE
+```
 
 ----
+
 
 ## Example Kubernetes deployment
 
@@ -84,7 +86,7 @@ Further more, in ingress mode, due to the fact how iptables/ipvs work and that t
 								"name": "PASSWORD",
 								"valueFrom": {
 									"secretKeyRef": {
-										"name": "kevip-password",
+										"name": "kevip",
 										"key": "password"
 									}
 								}
