@@ -23,7 +23,11 @@ In ingress mode this will be the cluster-IP of the service that you want to expo
 
 `--password` / `PASSWORD` this can be any hard to guess string that will be used for internal communication between Kevip replicas.
 
+In addition Kevip recognizes the following non-mandatory parameters:
+
 `--global-masquerade` / `GLOBAL_MASQUERADE` boolean that tells Kevip to setup a host-wide iptables `MASQUERADE` (ie: `iptables -t nat -A POSTROUTING -j MASQUERADE`) instead of targeted `SNAT` rule. This is necessary if the `TARGET` is also a VIP on the same machine, so for example for ingress mode. This may affect other services running on this machine though. In particular it breaks Kevip running in egress mode.
+
+`--vip-id` / `VIP_ID` CARP/VRRP protocols assign each VIP a 1 byte long (1-255) ID that is used for communication between replicas. Kevip by default uses the last of the 4 parts of the VIP as its ID (for example 87 for 17.45.28.87). You can use this param to override this default behaviour if you need.
 
 It is possible to mix command line flags and env variables. If both are defined for any param, then command line takes precedence.
 
