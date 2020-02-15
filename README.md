@@ -4,7 +4,7 @@
 Kevip is a simple [UCarp](https://github.com/jedisct1/UCarp) / [Keepalived](https://www.keepalived.org/) L2 VIP + iptables proxy.
 It can be used to provide a single static egress (source) virtual IP for a set of processes running on several machines (such as Kubernetes pods) if NAT is not possible for whatever reason (refereed hereinafter as *egress mode*). **Note: if you do have access to administrative settings of your subnet's network, then setting up subnet-wide NAT is definitely a preferred solution over Kevip, which should be considered as the last resort.**
 
-On clusters where external load-balancers are not available, it can be also used to expose a Kubernetes service on a single (public) virtual IP, although there are some [caveats and limitations](#caveats-and-limitations) in this mode (refereed hereinafter as *ingress mode*).
+On clusters where external load-balancers are not available, it can be also used to expose a Kubernetes service on a single (public) virtual IP, although there are some [caveats and limitations](#caveats-and-limitations) in this mode (refereed hereinafter as *k8s service ingress mode*).
 
 ----
 
@@ -15,19 +15,19 @@ Kevip requires 3 parameters that can be passed via command line flags or env var
 
 `--vip` / `VIP` virtual IP address to be created.
 In egress mode this is the IP that 3rd party external service (specified by `TARGET` below) will see as the source IP of the traffic incoming from your pods. This is also the IP that your pods should be sending the traffic intended for the given external service.
-In ingress mode this is the public IP on which your service will be exposed to external clients. VIP may be any unassigned IP from a subnet where the machine running Kevip is located. It should be outside of the dhcp pool, so that no other machine will ever get it assigned.
+In k8s service ingress mode this is the public IP on which your service will be exposed to external clients. VIP may be any unassigned IP from a subnet where the machine running Kevip is located. It should be outside of the dhcp pool, so that no other machine will ever get it assigned.
 
 `--target` / `TARGET` IP address where the traffic sent to the VIP should be redirected.
 In egress mode this will be the IP of the 3rd party external service to which you want to present your service's traffic as coming from the VIP.
-In ingress mode this will be the cluster-IP of the service that you want to expose.
+In k8s service ingress mode this will be the cluster-IP of the service that you want to expose.
 
 `--password` / `PASSWORD` this can be any hard to guess string that will be used for internal communication between Kevip replicas.
 
 In addition Kevip recognizes the following non-mandatory parameters:
 
-`--global-masquerade` / `GLOBAL_MASQUERADE` boolean that tells Kevip to setup a host-wide iptables `MASQUERADE` (ie: `iptables -t nat -A POSTROUTING -j MASQUERADE`) instead of targeted `SNAT` rule. This is necessary if the `TARGET` is also a VIP on the same machine, so for example for ingress mode. This may affect other services running on this machine though. In particular it breaks Kevip running in egress mode.
+`--global-masquerade` / `GLOBAL_MASQUERADE` boolean that tells Kevip to setup a host-wide iptables `MASQUERADE` (ie: `iptables -t nat -A POSTROUTING -j MASQUERADE`) instead of targeted `SNAT` rule. This is necessary if the `TARGET` is also a VIP on the same machine. So in particular it is necessary for k8s service ingress mode. This may affect other services running on this machine though. In particular it breaks Kevip running in egress mode.
 
-`--vip-id` / `VIP_ID` CARP/VRRP protocols assign each VIP a 1 byte long (1-255) ID that is used for communication between replicas. Kevip by default uses the last of the 4 parts of the VIP as its ID (for example 87 for 17.45.28.87). You can use this param to override this default behaviour if you need.
+`--vip-id` / `VIP_ID` CARP/VRRP protocols assign each VIP an 8 bit long ID (1-255), that is used for communication between replicas. Kevip by default uses the last of the 4 parts of the VIP as its ID (for example 87 for 17.45.28.87). You can use this param to override this default behaviour if you need.
 
 It is possible to mix command line flags and env variables. If both are defined for any param, then command line takes precedence.
 
@@ -41,11 +41,11 @@ Kevip must be granted permissions to setup a VIP and manipulate iptables. On Kub
 
 In egress mode Kevip can be running anywhere where your nodes can reach it, but it's recommended to run it on the cluster itself to reduce network latency.
 
-In ingress mode Kevip *must* be running on your cluster's nodes (either as your cluster's deployment or started from the node machine level), so that it can reach cluster-IP of its target service.
+In k8s service ingress mode Kevip *must* be running on your cluster's nodes (either as your cluster's deployment or started from the node machine level), so that it can reach cluster-IP of its target service.
 
-As explained before, in ingress mode, due to the fact how iptables/ipvs work and that the target cluster-IP is also a VIP itself, `--global-masquerade` flag is required that can affect other services. An ugly workaround is to dedicate few nodes only for Kevip in ingress mode.
+As explained before, in k8s service ingress mode, due to the fact how iptables/ipvs work and that the target cluster-IP is also a VIP itself, `--global-masquerade` flag that can affect other services is required. An ugly workaround is to dedicate few nodes only for Kevip in k8s service ingress mode.
 
-Due to limitations of CARP/VRRP protocols, it is possible to create up to 255 VIPs on a single (V)LAN.
+Due to the fact that CARP/VRRP protocols use 8 bit long IDs for VIPs, it is possible to create only up to 255 VIPs on a single (V)LAN.
 
 ----
 
