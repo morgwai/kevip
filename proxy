@@ -1,5 +1,5 @@
 #!/bin/bash
-params=( $(getopt --unquoted --longoptions vip:,target:,password: --options "" -- ${@} ) ) ;
+params=( $(getopt --unquoted --longoptions vip:,target:,password:,global-masquerade --options "" -- ${@} ) ) ;
 i=0 ;
 while [[ ${params[i]} != -- ]]; do
 	case "${params[i]}" in
@@ -12,18 +12,23 @@ while [[ ${params[i]} != -- ]]; do
 		--password)
 			i=$[ ${i} + 1 ] ;
 			PASSWORD=${params[i]} ;;
+		--global-masquerade)
+			GLOBAL_MASQUERADE=true ;;
 		*)
 			echo "unrecognized param: ${params[i]}" >&2;
 			exit 1;;
 	esac &&
 	i=$(( ${i} + 1 ));
 done ;
-for param in VIP TARGET PASSWORD; do 
+for param in VIP TARGET PASSWORD; do
 	if [[ -z ${!param} ]]; then
 		echo "invalid or missing ${param} param" >&2;
 		exit 1;
 	fi;
 done;
+if [[ "${GLOBAL_MASQUERADE}" != 'true' ]]; then
+	GLOBAL_MASQUERADE=false;
+fi;
 
 iface=$(ip route show default  |cut -d ' ' -f 5) &&
 addrInfo=( $(ip addr show ${iface} |grep inet |grep -v inet6 |grep -v secondary) ) &&
@@ -32,5 +37,5 @@ addr=${addrMask[0]}  &&
 mask=${addrMask[1]}  &&
 vid=$(echo ${VIP} |cut -d . -f 4) &&
 
-exec ucarp -z -n -u ./vip-add -d ./vip-del  -p ${PASSWORD} \
-	-i ${iface} -s ${addr} -a ${VIP} -v ${vid} -x "${mask} ${TARGET}"
+exec ucarp -z -n -u ./vip-add -d ./vip-del -p ${PASSWORD} \
+	-i ${iface} -s ${addr} -a ${VIP} -v ${vid} -x "${mask} ${TARGET} ${GLOBAL_MASQUERADE}"

@@ -23,6 +23,8 @@ In ingress mode this will be the cluster-IP of the service that you want to expo
 
 `--password` / `PASSWORD` this can be any hard to guess string that will be used for internal communication between Kevip replicas.
 
+`--global-masquerade` / `GLOBAL_MASQUERADE` boolean that tells Kevip to setup a host-wide iptables `MASQUERADE` (ie: `iptables -t nat -A POSTROUTING -j MASQUERADE`) instead of targeted `SNAT` rule. This is necessary if the `TARGET` is also a VIP on the same machine, so for example for ingress mode. This may affect other services running on this machine though. In particular it breaks Kevip running in egress mode.
+
 It is possible to mix command line flags and env variables. If both are defined for any param, then command line takes precedence.
 
 For high availability reasons, you should be running 2-3 replicas of Kevip for each VIP. At any given moment only 1 of the replicas will be holding the VIP and if this replica goes down for whatever reason, 1 of the remaining ones will take over by the means of CARP/VRRP protocols.
@@ -37,13 +39,9 @@ In egress mode Kevip can be running anywhere where your nodes can reach it, but 
 
 In ingress mode Kevip *must* be running on your cluster's nodes (either as your cluster's deployment or started from the node machine level), so that it can reach cluster-IP of its target service.
 
-Further more, in ingress mode, due to the fact how iptables/ipvs work and that the target cluster-IP is also a VIP itself, the following iptables rule must be added on all nodes where Kevip replicas may be scheduled:
-```bash
-iptables -t nat -A POSTROUTING -j MASQUERADE
-```
-This may affect other services running on these nodes though. In particular it breaks Kevip running in egress mode.
+As explained before, in ingress mode, due to the fact how iptables/ipvs work and that the target cluster-IP is also a VIP itself, `--global-masquerade` flag is required that can affect other services. An ugly workaround is to dedicate few nodes only for Kevip in ingress mode.
 
-Kevip should scale reasonably well in terms of traffic throughput, but it will probably not scale well in terms of number of VIPs on the same cluster (up to few hundred probably) as updating very long iptables with thousands of rules will be getting slower and slower.
+Due to limitations of CARP/VRRP protocols, it is possible to create up to 255 VIPs on a single (V)LAN.
 
 ----
 
@@ -81,7 +79,7 @@ Releases are provided as docker images at [docker hub](https://hub.docker.com/r/
                 "hostNetwork": true,
                 "containers": [{
                     "name": "kevip",
-                    "image": "morgwai/kevip:0.99.2",
+                    "image": "morgwai/kevip:0.99.3",
                     "securityContext": {
                         "capabilities": {
                             "add": ["NET_ADMIN", "NET_RAW"]
