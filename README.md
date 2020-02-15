@@ -2,7 +2,8 @@
 ### Kubernetes external VIP iptables proxy
 
 Kevip is a simple [UCarp](https://github.com/jedisct1/UCarp) / [Keepalived](https://www.keepalived.org/) L2 VIP + iptables proxy.
-It can be used to provide a single static egress (source) virtual IP for a set of processes running on several machines (such as Kubernetes pods) if NAT is not possible for whatever reason (refereed hereinafter as *egress mode*).
+It can be used to provide a single static egress (source) virtual IP for a set of processes running on several machines (such as Kubernetes pods) if NAT is not possible for whatever reason (refereed hereinafter as *egress mode*). **Note: if you do have access to administrative settings of your subnet's network, then setting up subnet-wide NAT is definitely a preferred solution over Kevip, which should be considered as the last resort.**
+
 On clusters where external load-balancers are not available, it can be also used to expose a Kubernetes service on a single (public) virtual IP, although there are some [caveats and limitations](#caveats-and-limitations) in this mode (refereed hereinafter as *ingress mode*).
 
 ----
