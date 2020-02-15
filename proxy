@@ -49,6 +49,7 @@ echo "TARGET: ${TARGET}" &&
 echo "iface: ${iface} ${addr}/${mask}" &&
 echo "VIP_ID: ${VIP_ID}" &&
 echo "prio: ${prio}" &&
+echo "GLOBAL_MASQUERADE: ${GLOBAL_MASQUERADE}" &&
 
 exec ucarp -z -n -u ./vip-add -d ./vip-del -p ${PASSWORD} -k ${prio} \
 	-i ${iface} -s ${addr} -a ${VIP} -v ${VIP_ID} -x "${mask} ${TARGET} ${GLOBAL_MASQUERADE}"
