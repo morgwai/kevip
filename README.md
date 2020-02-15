@@ -41,6 +41,8 @@ Kevip must be granted permissions to setup a VIP and manipulate iptables. On Kub
 
 In egress mode Kevip can be running anywhere where your nodes can reach it, but it's recommended to run it on the cluster itself to reduce network latency.
 
+k8s service ingress mode works *only* if kube-proxy is configured to use `IPVS` (default since k8s-1.10 if `ip_vs` kernel modules are pre-loaded).
+
 In k8s service ingress mode Kevip *must* be running on your cluster's nodes (either as your cluster's deployment or started from the node machine level), so that it can reach cluster-IP of its target service.
 
 As explained before, in k8s service ingress mode, due to the fact how iptables/ipvs work and that the target cluster-IP is also a VIP itself, `--global-masquerade` flag that can affect other services is required. An ugly workaround is to dedicate few nodes only for Kevip in k8s service ingress mode.
