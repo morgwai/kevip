@@ -5,7 +5,7 @@ Kevip is a simple [UCarp](https://github.com/jedisct1/UCarp) / [Keepalived](http
 
 It can be used to provide a single static egress (source) virtual IP for a set of processes running on several machines (such as Kubernetes pods) if NAT is not possible for whatever reason. This mode will be refereed hereinafter as *egress mode*. **Note: if you do have access to administrative settings of your subnet's network, then setting up a subnet-wide NAT is definitely a preferred solution over Kevip, which should be considered the last resort.**
 
-On k8s clusters where external load-balancers are not available, it can be also used to expose a k8s service on a single (public) virtual IP, although there are some [caveats and limitations](#caveats-and-limitations) in this mode (refereed hereinafter as *k8s service ingress mode*).
+On k8s clusters with kube-proxy in `IPVS` mode, Kevip can be also used to expose a k8s service on a single (public) virtual IP, if external load-balancers are not available. There are however some serious [caveats and limitations](#caveats-and-limitations) in this mode (refereed hereinafter as *k8s service ingress mode*).
 
 ----
 
